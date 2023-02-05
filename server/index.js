@@ -91,24 +91,19 @@ app.post('/api/users/login', (req, res) => {
 
 //auth 미들웨어
 //미들웨어: 중간에서 어떤 동작을 수행한다. hook 과 어떻게 다른거?
-app.get('/api/users/auth',auth,(req,res)=>{
-    console.log("test");
-
-    //여기까지 미들웨어를 통과했다는것은  Authentication 이 True
-    res.status(200),json({
-        _id: req.user._id,
-        isAdmin: req.uuser.role === 0 ? false: true,
-        isAuth: true,
-        email: req.user.email,
-        name: req.user.name,
-        lastname:req.user.lastname,
-        role: req.user.role,
-        image: req.user.image
-
+app.get('/api/users/auth', auth, (req, res) => {
+    //여기 까지 미들웨어를 통과해 왔다는 얘기는  Authentication 이 True 라는 말.
+    res.status(200).json({
+      _id: req.user._id,
+      isAdmin: req.user.role === 0 ? false : true,
+      isAuth: true,
+      email: req.user.email,
+      name: req.user.name,
+      lastname: req.user.lastname,
+      role: req.user.role,
+      image: req.user.image
     })
-
-    console.log("test");
-})
+  })
 
 
 app.get('/api/users/logout',auth,(req,res) =>{
