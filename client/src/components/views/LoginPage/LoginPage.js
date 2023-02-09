@@ -21,7 +21,7 @@ function LoginPage() {
 
   const onPasswordHandler = (event) => {
     setPassword(event.currentTarget.value);
-  }
+    }
 
   const onSubmitHandler = (event) => {
     //preventDefault 사용하면 리프레시가 되지 않는다.
@@ -38,9 +38,9 @@ function LoginPage() {
     //리덕스 사용
     dispatch(loginUser(body))
       .then(response => {
-        if(response.payload.loginSuccess){
+        if (response.payload.loginSuccess) {
           navigate('/')
-        }else{
+        } else {
           alert('Error')
         }
       })

@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser';
 app.use(cookieParser());
 
 import User from "./model/User.js";
+import Account from "./model/Account.js";
 //const {User} = require("./models/User")
 
 const port = 5000
@@ -36,7 +37,6 @@ app.post('/api/users/register', (req, res) => {
 
     //회원가입할 때 필요한 정보들을 client에서 가져오면
     //그것들을 데이터 베이스에 넣어준다.
-    console.log(req.body)
     const user = new User(req.body);
 
     user.save((err, userInfo) => {
@@ -58,13 +58,11 @@ app.post('/api/users/login', (req, res) => {
                 message: "제공된 이메일에 해당하는 유저가 없습니다."
             })
         }
-        console.log("아이디 일치")
         //2. 요청된 이메일이 있는 경우, 비밀번호가 맞는지 체크.
         user.comparePassword(req.body.password, (err, isMatched) => {
             if (!isMatched) {
                 return res.json({ loginSuccess: false, message: "비밀번호가 틀렸습니다." });
             }
-            console.log("비밀번호 일치")
 
             //3. 비밀번호 일치시 토큰 생성.
             user.generateToken((err, user) => {
@@ -76,7 +74,6 @@ app.post('/api/users/login', (req, res) => {
                 .status(200)
                 .json({loginSuccess: true, userId: user._id})
             })
-            console.log("토큰생성완료")
 
         })
     })
@@ -119,10 +116,28 @@ app.get('/api/users/logout',auth,(req,res) =>{
 
 
 app.get('/api/hello', (req,res) =>{
-    
     res.send("안녕하세요");
 })
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
+})
+
+
+//account
+app.post('/api/account/insert', (req, res) => {
+
+    //회원가입할 때 필요한 정보들을 client에서 가져오면
+    //그것들을 데이터 베이스에 넣어준다.
+    const account = new Account(req.body);
+
+    account.save((err, accountInfo) => {
+        console.log(err)
+        if (err) return res.json({ success: false, err })
+        console.log(res);
+        return res.status(200).json({
+            success: true
+        })
+    });
+
 })

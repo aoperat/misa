@@ -2,7 +2,7 @@ import { Axios } from 'axios';
 //import { response } from 'express';
 import React, { useState } from 'react';
 import {useDispatch} from 'react-redux';
-import {loginUser,registerUser} from '../../../_actions/user_action'
+import {registerUser} from '../../../_actions/user_action'
 import {useNavigate} from 'react-router-dom'
 
 
@@ -82,7 +82,7 @@ function RegisterPage() {
         <label>Confirm Password</label>
         <input type="password" value={ConfirmPassword} onChange={onConfirmPasswordHandler}/>
 
-        <button>로그인</button>
+        <button>회원가입</button>
       </form>
 
     </div>

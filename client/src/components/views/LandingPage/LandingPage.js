@@ -8,13 +8,14 @@ function LandingPage() {
 
   useEffect(() =>{
     axios.get('/api/hello')
-    .then(response => console.log(response.data))
+    .then(response => {
+    })
+
   },[])
 
   const onClickHandler = () =>{
     axios.get('/api/users/logout')
       .then(response => {
-        console.log(response.data)
         if(response.data.success){
           navigate('/login')
         }else{
