@@ -1,8 +1,21 @@
 import axios from 'axios';
 
 import {
-    INSERT_ACCOUNT
+    INSERT_ACCOUNT,
+    RETRIEVE_ACCOUNT
 } from './types'
+
+
+export function retrieveAccountList(dataToSubmit){
+
+    const request = axios.post('/api/account/retrieve',dataToSubmit)
+         .then(response => response.data)
+
+    return {
+        type: RETRIEVE_ACCOUNT,
+        payload: request
+    }
+}
 
 export function insertAccount(dataToSubmit){
 
@@ -11,7 +24,6 @@ export function insertAccount(dataToSubmit){
 
     return {
         type: INSERT_ACCOUNT,
-        //payload: request
         payload: request
     }
 }

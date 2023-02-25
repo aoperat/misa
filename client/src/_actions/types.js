@@ -5,3 +5,4 @@ export const AUTH_USER = 'auth_user';
 
 //acount
 export const INSERT_ACCOUNT = "insert_account";
+export const RETRIEVE_ACCOUNT = "retrieve_account";

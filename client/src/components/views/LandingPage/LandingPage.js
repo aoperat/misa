@@ -6,12 +6,12 @@ function LandingPage() {
 
   const navigate = useNavigate();
 
-  useEffect(() =>{
-    axios.get('/api/hello')
-    .then(response => {
-    })
+  // useEffect(() =>{
+  //   axios.get('/api/hello')
+  //   .then(response => {
+  //   })
 
-  },[])
+  // },[])
 
   const onClickHandler = () =>{
     axios.get('/api/users/logout')

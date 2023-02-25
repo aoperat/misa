@@ -93,8 +93,6 @@ userSchema.methods.comparePassword = function(plainPassword, callback){
 
 //선언없이 메서드 호출을 위해 statics 사용
 userSchema.statics.findByToken = function(token, callback){
-    console.log("user.findByToken")
-
     var user = this;
     
     //토큰을 decode 한다.

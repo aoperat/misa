@@ -129,15 +129,34 @@ app.post('/api/account/insert', (req, res) => {
 
     //회원가입할 때 필요한 정보들을 client에서 가져오면
     //그것들을 데이터 베이스에 넣어준다.
-    const account = new Account(req.body);
 
+    const account = new Account(req.body);
     account.save((err, accountInfo) => {
         console.log(err)
         if (err) return res.json({ success: false, err })
-        console.log(res);
         return res.status(200).json({
             success: true
         })
     });
+
+})
+
+app.post('/api/account/retrieve', (req, res) => {
+
+    //회원가입할 때 필요한 정보들을 client에서 가져오면
+    //그것들을 데이터 베이스에 넣어준다.
+    //const account = new Account(req.body);
+    if(req.body.userId != null){
+        
+        Account.find({userId: req.body.userId}, (err, accounts) => {
+            if (err) {
+            return err
+            }
+            console.log("accounts success",accounts)
+            return res.status(200).send({success:true,accounts:accounts});
+            
+        });
+    }
+    
 
 })

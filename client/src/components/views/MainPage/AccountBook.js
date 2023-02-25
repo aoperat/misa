@@ -1,47 +1,50 @@
-import axios from 'axios'
-//import { response } from 'express';
+import React, { useState, useEffect, useRef} from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+//import { DatePicker } from 'antd';
+import moment from 'moment';
 
-import React, { useState } from 'react';
-import { Table } from 'react-bootstrap'
-import { useSelector, useDispatch } from "react-redux";
-import { DatePicker } from 'antd';
-import { Button } from 'react-bootstrap';
-import { insertAccount } from '../../../_actions/account_action'
-// import { useDispatch } from 'react-redux';
-// import { loginUser } from '../../../_actions/user_action'
-// import { useNavigate } from 'react-router-dom'
-
-
+import { Table, Row, Col } from 'react-bootstrap';
+import { Form, Button } from 'react-bootstrap';
+import { retrieveAccountList, insertAccount } from '../../../_actions/account_action';
 
 function AccountBook() {
-
-  const user = useSelector(state => state.user);
-  //"63df3bc7a056883aec1dea03"
-  //"63df3bc7a056883aec1dea03"
+  const [accounts, setAccounts] = useState([]);
 
   return (
-    <div>
-      <지출내역Table></지출내역Table>
-      <지출내역입력Form></지출내역입력Form>
-    </div>
-  )
+    <Row>
+       <Col md={4} className="pr-3 border-right">
+        <AccountForm setAccounts={setAccounts} />
+      </Col>
+      <Col md={8} className="pl-3">
+
+        <AccountTable accounts={accounts} setAccounts={setAccounts} />
+      </Col>
+    </Row>
+  );
+
 }
 
-function 지출내역입력Form() {
-
+function AccountForm({ setAccounts }) {
+  const user = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
-  const [Date, setDate] = useState('');
-  const [Description, setDescription] = useState('');
-  const [Amount, setAmount] = useState('');
-  const [Category, setCategory] = useState('');
-  const [PaymentMethod, setPaymentMethod] = useState('');
+  const [date, setDate] = useState('');
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('');
 
-  const handleDateChange = (date, dateString) => {
-    setDate(dateString);
+  const descriptionRef = useRef(null);
+  const amountRef = useRef(null);
+  const categoryRef = useRef(null);
+  const paymentMethodRef = useRef(null);
+
+  const handleDateChange = (event) => {
+    
+    setDate(event.target.value);
   };
 
-  const handleInputChange = event => {
+  const handleInputChange = (event) => {
     switch (event.target.name) {
       case 'description':
         setDescription(event.target.value);
@@ -61,85 +64,129 @@ function 지출내역입력Form() {
   };
 
   const onSubmitHandler = (event) => {
-    //preventDefault 사용하면 리프레시가 되지 않는다.
     event.preventDefault();
 
-
-    let body = {
-      date: Date,
-      description: Description,
-      amount: Amount,
-      category:Category,
-      paymentMethod:PaymentMethod
+    if (!date) {
+      alert('날짜를 입력해주세요.');
+      return;
     }
 
-    console.log(body);
-    // 리덕스 사용
-    dispatch(insertAccount(body))
-      .then(response => {
-        if (response.payload.success) {
-          // navigate('/login')
-          //alert(response);
-        } else {
-          alert('Error')
-        }
-      })
+    if (!description) {
+      alert('내용을 입력해주세요.');
+      descriptionRef.current?.focus();
+      return;
+    }
 
-  }
+    if (!amount) {
+      alert('금액을 입력해주세요.');
+      amountRef.current?.focus();
+      return;
+    }
+
+    if (!category) {
+      alert('카테고리를 선택해주세요.');
+      categoryRef.current?.focus();
+      return;
+    }
+
+    if (!paymentMethod) {
+      alert('결제 수단을 선택해주세요.');
+      paymentMethodRef.current?.focus();
+      return;
+    }
+
+    const body = {
+      date,
+      description,
+      amount,
+      category,
+      paymentMethod,
+      userId: user.userData._id,
+    };
+
+    dispatch(insertAccount(body)).then((response) => {
+      if (response.payload.success) {
+        dispatch(retrieveAccountList({ userId: user.userData._id })).then((response) => {
+          if (response.payload.success) {
+            setAccounts(response.payload.accounts);
+          } else {
+            alert('Error');
+          }
+        });
+      } else {
+        alert('Error');
+      }
+    });
+  };
 
   return (
-    <form style={{ display: 'flex', flexDirection: 'column' }}
-      onSubmit={onSubmitHandler}
-    >
-      <DatePicker onChange={handleDateChange} />
-      <input
-        type="text"
-        placeholder="Description"
-        name="description"
-        value={Description}
-        onChange={handleInputChange}
-      />
-      <input
-        type="text"
-        placeholder="Amount"
-        name="amount"
-        value={Amount}
-        onChange={handleInputChange}
-      />
-      <select
-        name="category"
-        value={Category}
-        onChange={handleInputChange}
-      >
-        <option value="">Select a category</option>
-        <option value="groceries">Groceries</option>
-        <option value="transportation">Transportation</option>
-        <option value="entertainment">Entertainment</option>
-        <option value="other">Other</option>
-      </select>
-      <select
-        name="paymentMethod"
-        value={PaymentMethod}
-        onChange={handleInputChange}
-      >
-        <option value="">Select a payment method</option>
-        <option value="cash">Cash</option>
-        <option value="credit">Credit</option>
-        <option value="debit">Debit</option>
-      </select>
-
-      <button>입력</button>
-    </form>
+    <div className="card p-3" style={{ backgroundColor: "#f8f9fa" }}>
+          <Form onSubmit={onSubmitHandler}>
+          <Form.Group controlId="formBasicDate">
+            <Form.Label>날짜</Form.Label>
+            <br />
+            <Form.Control type="date" value={moment(date).format('YYYY-MM-DD')} onChange={handleDateChange} />
+          </Form.Group>
+            <Form.Group controlId="formBasicDescription">
+              <Form.Label>내용</Form.Label>
+              <Form.Control type="text" placeholder="내용" name="description" value={description} onChange={handleInputChange} />
+            </Form.Group>
+            <Form.Group controlId="formBasicAmount">
+              <Form.Label>금액</Form.Label>
+              <Form.Control type="text" placeholder="금액" name="amount" value={amount} onChange={handleInputChange} />
+            </Form.Group>
+            <Form.Group controlId="formBasicCategory">
+              <Form.Label>카테고리</Form.Label>
+              <Form.Control as="select" name="category" value={category} onChange={handleInputChange}>
+                <option value="">카테고리</option>
+                <option value="식료품">식료품</option>
+                <option value="교통">교통</option>
+                <option value="문화">문화</option>
+                <option value="기타">기타</option>
+              </Form.Control>
+            </Form.Group>
+            <Form.Group controlId="formBasicPaymentMethod">
+              <Form.Label>결재구분</Form.Label>
+              <Form.Control as="select" name="paymentMethod" value={paymentMethod} onChange={handleInputChange}>
+                <option value="">사용구분</option>
+                <option value="현금">현금</option>
+                <option value="신용카드">신용카드</option>
+              </Form.Control>
+            </Form.Group>
+            <div className='d-flex justify-content-end mt-2'>
+  <Button variant="primary" type="submit">
+    입력
+  </Button>
+</div>
+          </Form>
+          </div>
   );
-};
+  
+}
 
 
-function 지출내역Table() {
+function AccountTable(props) {
+  const dispatch = useDispatch();
+  const user = useSelector(state => state.user);
+  
+  useEffect(() => {
+    if (user.userData) { // user.userData가 존재하는 경우에만 실행
+      let body = { userId: user.userData._id };
+      dispatch(retrieveAccountList(body)).then(response => {
+        if (response.payload.success) {
+          props.setAccounts(response.payload.accounts);
+        } else {
+          alert('Error');
+        }
+      });
+    }
+  }, [dispatch, user.userData]);
+
 
   return (
     <div className='container'>
       <div className='row'>
-        <div className='col-6'>
+        <div className='col-12'>
           <Table striped hover size="sm" className='table'>
             <thead>
               <tr>
@@ -151,28 +198,22 @@ function 지출내역Table() {
               </tr>
             </thead>
             <tbody>
-
-              <tr>
-                <td>2023-01-30</td>
-                <td>강의 결재</td>
-                <td>50,000</td>
-                <td>공부</td>
-                <td>국민신용</td>
-              </tr>
-              <tr>
-                <td>2023-01-30</td>
-                <td>편의점 도시락</td>
-                <td>4,700</td>
-                <td>식비</td>
-                <td>국민체크</td>
-              </tr>
-
+              {props.accounts.map(account => (
+                <tr key={account._id}>
+                  <td>{account.date}</td>
+                  <td>{account.description}</td>
+                  <td>{account.amount}</td>
+                  <td>{account.category}</td>
+                  <td>{account.paymentMethod}</td>
+                </tr>
+              ))}
             </tbody>
           </Table>
         </div>
       </div>
-    </div >
-  )
+    </div>
+  );
 }
+
 
 export default AccountBook
