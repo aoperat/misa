@@ -1,37 +1,46 @@
-//const express = require('express')
-import express from 'express'
-const app = express()
+
+// Import libraries
+import express from 'express';
+import mongoose from 'mongoose';
+import cookieParser from 'cookie-parser';
+
+// Import models
+import User from './model/User.js';
+import Account from './model/Account.js';
+
+// Import middleware
+import auth from './middleware/auth.js';
+
+// Import configuration
+import config from './config/dev.js';
+
+// Set up express app
+const app = express();
+const port = 5000;
+
+// Connect to MongoDB
+mongoose.set('strictQuery', true);
+mongoose
+.connect(config.mongoURI, {
+useNewUrlParser: true,
+useUnifiedTopology: true,
+})
+.then(() => console.log('MongoDB Connected...'))
+.catch(err => console.log(err));
+
+// Use middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-import cookieParser from 'cookie-parser';
 app.use(cookieParser());
 
-import User from "./model/User.js";
-import Account from "./model/Account.js";
-//const {User} = require("./models/User")
 
-const port = 5000
-
-//const mongoose = require('mongoose')
-import mongoose from 'mongoose';
-import config from './config/dev.js'
-
-
-import auth from './middleware/auth.js'
-
-mongoose.set('strictQuery', true)
-
-mongoose.connect(config.mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => console.log('MongoDB Connected...'))
-    .catch(err => console.log(err))
-
-
+// Routes
 app.get('/', (req, res) => {
     res.send('Hello World!!')
 })
+
+
+
 
 app.post('/api/users/register', (req, res) => {
 
@@ -142,21 +151,27 @@ app.post('/api/account/insert', (req, res) => {
 })
 
 app.post('/api/account/retrieve', (req, res) => {
-
-    //회원가입할 때 필요한 정보들을 client에서 가져오면
-    //그것들을 데이터 베이스에 넣어준다.
-    //const account = new Account(req.body);
-    if(req.body.userId != null){
-        
-        Account.find({userId: req.body.userId}, (err, accounts) => {
-            if (err) {
-            return err
-            }
-            console.log("accounts success",accounts)
-            return res.status(200).send({success:true,accounts:accounts});
-            
-        });
+    const { userId, searchContent, searchCategory, searchPaymentMethod } = req.body;
+  
+    const query = { userId };
+  
+    if (searchContent) {
+      query.description = { $regex: searchContent, $options: 'i' };
     }
-    
-
-})
+  
+    if (searchCategory) {
+      query.category = searchCategory;
+    }
+  
+    if (searchPaymentMethod) {
+      query.paymentMethod = searchPaymentMethod;
+    }
+  
+    Account.find(query, (err, accounts) => {
+      if (err) {
+        return res.status(500).send({ success: false, message: 'Database error' });
+      }
+      return res.status(200).send({ success: true, accounts });
+    });
+  });
+  
