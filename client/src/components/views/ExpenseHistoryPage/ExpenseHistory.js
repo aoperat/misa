@@ -7,7 +7,7 @@ import { Table, Row, Col } from 'react-bootstrap';
 import { Form, Button } from 'react-bootstrap';
 import { retrieveAccountList, insertAccount } from '../../../_actions/account_action';
 
-function AccountBook() {
+function ExpenseHistory() {
   const [accounts, setAccounts] = useState([]);
   const [searchContent, setSearchContent] = useState('');
   const [searchCategory, setSearchCategory] = useState('');
@@ -15,25 +15,34 @@ function AccountBook() {
 
   return (
     <div>
-    
-    <Row>
-      <Col md={4} className="pr-3 border-right">
-        <AccountForm setAccounts={setAccounts} />
-        <SearchCard
-            searchContent={searchContent}
-            setSearchContent={setSearchContent}
-            searchCategory={searchCategory}
-            setSearchCategory={setSearchCategory}
-            searchPaymentMethod={searchPaymentMethod}
-            setSearchPaymentMethod={setSearchPaymentMethod}
-            setAccounts={setAccounts}
-          />
-      </Col>
-      <Col md={8} className="pl-3">
+      <Row>
+      <Col md={2}></Col>
+        <Col md={8}>
+        <Row className="m-2">
+        <Col md={12}  ><SearchCard
+          searchContent={searchContent}
+          setSearchContent={setSearchContent}
+          searchCategory={searchCategory}
+          setSearchCategory={setSearchCategory}
+          searchPaymentMethod={searchPaymentMethod}
+          setSearchPaymentMethod={setSearchPaymentMethod}
+          setAccounts={setAccounts}
+        /></Col>
+      </Row>
+      <Row className='m-2'>
+        <Col md={8} >
+          <AccountTable accounts={accounts} setAccounts={setAccounts} />
+        </Col>
+        <Col md={4} >
+          <AccountForm setAccounts={setAccounts} />
 
-        <AccountTable accounts={accounts} setAccounts={setAccounts} />
-      </Col>
-    </Row>
+        </Col>
+
+      </Row>
+        </Col>
+        <Col md={2}></Col>
+      </Row>
+      
     </div>
   );
 
@@ -55,8 +64,7 @@ function AccountForm({ setAccounts }) {
   const paymentMethodRef = useRef(null);
 
   const handleDateChange = (event) => {
-
-    setDate(event.target.value);
+    setDate(moment(event.target.value).format('YYYY-MM-DD'));
   };
 
   const handleInputChange = (event) => {
@@ -134,11 +142,11 @@ function AccountForm({ setAccounts }) {
     });
   };
 
-  
+
   return (
     <div className="card p-3" style={{ backgroundColor: "#f8f9fa" }}>
       <h2>지출내역 입력</h2>
-      <Form onSubmit={onSubmitHandler}>
+      <Form onSubmit={onSubmitHandler}>        
         <Form.Group controlId="formBasicDate">
           <Form.Label>날짜</Form.Label>
           <br />
@@ -185,25 +193,26 @@ function AccountForm({ setAccounts }) {
 function AccountTable(props) {
   const dispatch = useDispatch();
   const user = useSelector(state => state.user);
+  const { setAccounts, accounts } = props; // 필요한 props를 비구조화 할당하여 가져옵니다.
 
   useEffect(() => {
     if (user.userData) { // user.userData가 존재하는 경우에만 실행
       let body = { userId: user.userData._id };
       dispatch(retrieveAccountList(body)).then(response => {
         if (response.payload.success) {
-          props.setAccounts(response.payload.accounts);
+          setAccounts(response.payload.accounts);
         } else {
           alert('Error');
         }
       });
     }
-  }, [dispatch, user.userData]);
+  }, [dispatch, user.userData,setAccounts]);
 
 
   return (
-    <div className='container'>
-      <div className='row'>
-        <div className='col-12'>
+    <div className="card p-3" style={{ backgroundColor: "#f8f9fa" }}>
+      <Row>
+        
           <Table striped hover size="sm" className='table'>
             <thead>
               <tr>
@@ -215,7 +224,7 @@ function AccountTable(props) {
               </tr>
             </thead>
             <tbody>
-              {props.accounts.map(account => (
+              {accounts.map(account => (
                 <tr key={account._id}>
                   <td>{account.date}</td>
                   <td>{account.description}</td>
@@ -226,8 +235,7 @@ function AccountTable(props) {
               ))}
             </tbody>
           </Table>
-        </div>
-      </div>
+      </Row>
     </div>
   );
 }
@@ -281,13 +289,18 @@ function SearchCard({
   };
 
   return (
+    
     <div className="card p-3" style={{ backgroundColor: "#f8f9fa" }}>
-      <h2>검색</h2>
-      <Form onSubmit={onSubmitHandler}>
+  <h2>검색</h2>
+  <Form onSubmit={onSubmitHandler}>
+    <Row>
+      <Col md={3}>
         <Form.Group controlId="formBasicSearchContent">
           <Form.Label>내용</Form.Label>
           <Form.Control type="text" placeholder="내용" name="searchContent" value={searchContent} onChange={handleInputChange} />
         </Form.Group>
+      </Col>
+      <Col md={3}>
         <Form.Group controlId="formBasicSearchCategory">
           <Form.Label>카테고리</Form.Label>
           <Form.Control as="select" name="searchCategory" value={searchCategory} onChange={handleInputChange}>
@@ -298,6 +311,8 @@ function SearchCard({
             <option value="기타">기타</option>
           </Form.Control>
         </Form.Group>
+      </Col>
+      <Col md={3}>
         <Form.Group controlId="formBasicSearchPaymentMethod">
           <Form.Label>결재구분</Form.Label>
           <Form.Control as="select" name="searchPaymentMethod" value={searchPaymentMethod} onChange={handleInputChange}>
@@ -306,16 +321,19 @@ function SearchCard({
             <option value="신용카드">신용카드</option>
           </Form.Control>
         </Form.Group>
-        <div className='d-flex justify-content-end mt-2'>
-          <Button variant="primary" type="submit">
-            검색
-          </Button>
-        </div>
-      </Form>
-    </div>
+      </Col>
+      <Col md={3} className="d-flex align-items-end">
+        <Button variant="primary" type="submit">
+          검색
+        </Button>
+      </Col>
+    </Row>
+  </Form>
+</div>
+
   );
 }
 
 
 
-export default AccountBook
+export default ExpenseHistory

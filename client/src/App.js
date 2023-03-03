@@ -1,18 +1,18 @@
-import logo from './logo.svg';
 import './App.css';
 import {
   BrowserRouter as Router,
   Routes,
-  Route,
-  Link
+  Route
 } from "react-router-dom";
 import Auth from './hoc/auth'
 
 import LandingPage from './components/views/LandingPage/LandingPage'
 import LoginPage from './components/views/LoginPage/LoginPage'
 import RegisterPage from './components/views/RegisterPage/RegisterPage'
-import AccountBookPage from './components/views/MainPage/AccountBook'
-import {Button,Navbar,Container,Nav, Table} from 'react-bootstrap';
+import ExpenseHistoryPage from './components/views/ExpenseHistoryPage/ExpenseHistory'
+import FixedExpensesPage from './components/views/FixedExpensesPage/FixedExpenses'
+import TotalPage from './components/views/TotalPage/Total'
+import {Navbar,Container,Nav} from 'react-bootstrap';
 
 function App() {
 
@@ -21,7 +21,9 @@ function App() {
   const AuthLoginPage = Auth(LoginPage, false);
   const AuthRegisterPage = Auth(RegisterPage, false);
 
-  const AuthAccountBookPage = Auth(AccountBookPage, true);
+  const AuthExpenseHistoryPage = Auth(ExpenseHistoryPage, true);
+  const AuthFixedExpensesPage = Auth(FixedExpensesPage, true);
+  const AuthTotalPage = Auth(TotalPage, true);
 
   //null 아무나 출입가능
   //true 로그인한 유저만 출입 가능
@@ -33,8 +35,9 @@ function App() {
         <Container>
           <Navbar.Brand href="/">미자</Navbar.Brand>
           <Nav className="me-auto">
-            <Nav.Link href="/AccountBook">지출내역</Nav.Link>
-            <Nav.Link href="#features">종합</Nav.Link>
+            <Nav.Link href="/expenseHistory">지출내역</Nav.Link>
+            <Nav.Link href="/fixedExpenses">고정비</Nav.Link>
+            <Nav.Link href="/total">종합</Nav.Link>
             <Nav.Link href="#pricing">목표</Nav.Link>
           </Nav>
           <Nav>
@@ -53,7 +56,9 @@ function App() {
           <Route exact path="/" element = {<AuthLandingPage/> } />
           <Route exact path="/login" element = {<AuthLoginPage/>} />
           <Route exact path="/register" element = {<AuthRegisterPage/> } />
-          <Route exact path="/AccountBook" element = {<AuthAccountBookPage/> } />
+          <Route exact path="/expenseHistory" element = {<AuthExpenseHistoryPage/> } />
+          <Route exact path="/fixedExpenses" element = {<AuthFixedExpensesPage/> } />
+          <Route exact path="/total" element = {<AuthTotalPage/> } />
         </Routes>
     </Router>
     </div>

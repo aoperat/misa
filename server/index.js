@@ -167,11 +167,31 @@ app.post('/api/account/retrieve', (req, res) => {
       query.paymentMethod = searchPaymentMethod;
     }
   
+    // 쿼리를 통해 지출내역을 가져옴
     Account.find(query, (err, accounts) => {
       if (err) {
         return res.status(500).send({ success: false, message: 'Database error' });
       }
-      return res.status(200).send({ success: true, accounts });
+
+      // 월별 지출내역을 저장할 객체를 생성
+      const monthlyTotal = {};
+
+      // 각각의 지출내역을 순회하면서 월별 합계를 계산
+      accounts.forEach((account) => {
+        const date = new Date(account.date);
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const key = `${year}-${month.toString().padStart(2, '0')}`;
+
+        if (!monthlyTotal[key]) {
+          monthlyTotal[key] = 0;
+        }
+
+        monthlyTotal[key] += parseInt(account.amount);
+      });
+
+      // 결과를 반환
+      return res.status(200).send({ success: true, accounts, monthlyTotal });
     });
   });
   
