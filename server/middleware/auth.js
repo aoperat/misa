@@ -1,4 +1,4 @@
-import User from "../model/User.js"
+import User from "../models/User.js"
 
 //인증 처리 하는곳
 let auth = (req, res, next) => {

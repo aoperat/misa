@@ -4,9 +4,11 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 
-// Import models
-import User from './model/User.js';
-import Account from './model/Account.js';
+// Import Controllers
+//import userControllers from './controllers/userController.js'
+import accountControllers from './controllers/accountController.js';
+import cardControllers from './controllers/cardController.js';
+
 
 // Import middleware
 import auth from './middleware/auth.js';
@@ -21,12 +23,12 @@ const port = 5000;
 // Connect to MongoDB
 mongoose.set('strictQuery', true);
 mongoose
-.connect(config.mongoURI, {
-useNewUrlParser: true,
-useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB Connected...'))
-.catch(err => console.log(err));
+    .connect(config.mongoURI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+    .then(() => console.log('MongoDB Connected...'))
+    .catch(err => console.log(err));
 
 // Use middleware
 app.use(express.json());
@@ -40,7 +42,14 @@ app.get('/', (req, res) => {
 })
 
 
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+})
 
+
+import User from './models/User.js';
+
+const router = express.Router();
 
 app.post('/api/users/register', (req, res) => {
 
@@ -54,7 +63,6 @@ app.post('/api/users/register', (req, res) => {
             success: true
         })
     });
-
 })
 
 //로그인 
@@ -80,14 +88,12 @@ app.post('/api/users/login', (req, res) => {
                 // 토큰 저장. 어디에? 쿠키, 로컬스토리지 중 쿠키
 
                 res.cookie("x_auth", user.token)
-                .status(200)
-                .json({loginSuccess: true, userId: user._id})
+                    .status(200)
+                    .json({ loginSuccess: true, userId: user._id })
             })
-
         })
     })
 })
-
 
 // role 
 // 0이 아니면 관리자
@@ -100,98 +106,31 @@ app.post('/api/users/login', (req, res) => {
 app.get('/api/users/auth', auth, (req, res) => {
     //여기 까지 미들웨어를 통과해 왔다는 얘기는  Authentication 이 True 라는 말.
     res.status(200).json({
-      _id: req.user._id,
-      isAdmin: req.user.role === 0 ? false : true,
-      isAuth: true,
-      email: req.user.email,
-      name: req.user.name,
-      lastname: req.user.lastname,
-      role: req.user.role,
-      image: req.user.image
-    })
-  })
-
-
-app.get('/api/users/logout',auth,(req,res) =>{
-
-    User.findOneAndUpdate({_id: req.user._id}, {
-        token:""
-    },(err,user) =>{
-        if(err) return res.json({success:false,err});
-        return res.status(200).send({success:true});
+        _id: req.user._id,
+        isAdmin: req.user.role === 0 ? false : true,
+        isAuth: true,
+        email: req.user.email,
+        name: req.user.name,
+        lastname: req.user.lastname,
+        role: req.user.role,
+        image: req.user.image
     })
 })
 
-
-
-app.get('/api/hello', (req,res) =>{
-    res.send("안녕하세요");
+app.get('/api/users/logout', auth, (req, res) => {
+    User.findOneAndUpdate({ _id: req.user._id }, {
+        token: ""
+    }, (err, user) => {
+        if (err) return res.json({ success: false, err });
+        return res.status(200).send({ success: true });
+    })
 })
-
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-})
-
 
 //account
-app.post('/api/account/insert', (req, res) => {
+app.use('/api/account', accountControllers);
 
-    //회원가입할 때 필요한 정보들을 client에서 가져오면
-    //그것들을 데이터 베이스에 넣어준다.
+//card
+app.use('/api/card', cardControllers);
 
-    const account = new Account(req.body);
-    account.save((err, accountInfo) => {
-        console.log(err)
-        if (err) return res.json({ success: false, err })
-        return res.status(200).json({
-            success: true
-        })
-    });
 
-})
 
-app.post('/api/account/retrieve', (req, res) => {
-    const { userId, searchContent, searchCategory, searchPaymentMethod } = req.body;
-  
-    const query = { userId };
-  
-    if (searchContent) {
-      query.description = { $regex: searchContent, $options: 'i' };
-    }
-  
-    if (searchCategory) {
-      query.category = searchCategory;
-    }
-  
-    if (searchPaymentMethod) {
-      query.paymentMethod = searchPaymentMethod;
-    }
-  
-    // 쿼리를 통해 지출내역을 가져옴
-    Account.find(query, (err, accounts) => {
-      if (err) {
-        return res.status(500).send({ success: false, message: 'Database error' });
-      }
-
-      // 월별 지출내역을 저장할 객체를 생성
-      const monthlyTotal = {};
-
-      // 각각의 지출내역을 순회하면서 월별 합계를 계산
-      accounts.forEach((account) => {
-        const date = new Date(account.date);
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        const key = `${year}-${month.toString().padStart(2, '0')}`;
-
-        if (!monthlyTotal[key]) {
-          monthlyTotal[key] = 0;
-        }
-
-        monthlyTotal[key] += parseInt(account.amount);
-      });
-
-      // 결과를 반환
-      return res.status(200).send({ success: true, accounts, monthlyTotal });
-    });
-  });
-  

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Row, Col } from 'react-bootstrap'
 import { retrieveAccountList } from '../../../_actions/account_action';
 import { useSelector, useDispatch } from 'react-redux';
-import '../../../App.css'
+import './Total.css'
 
 function Total() {
 
@@ -46,9 +46,10 @@ function Total() {
                 <Col md={2}></Col>
                 <Col md={8}>
                 <Row className="m-2">
-                <div className="card p-3" style={{ backgroundColor: "#f8f9fa" }}>
+                <div className="card p-3 table-wrapper-scroll-y" style={{ backgroundColor: "#f8f9fa" }}>
                     <h2>연 평가</h2>
-                    <Table striped bordered hover>
+                    <Table striped bordered hover className='table-font-size'>
+
                         <thead>
                             <tr>
                                 <th colSpan="2">2023년</th>

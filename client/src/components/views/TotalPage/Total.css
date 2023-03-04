@@ -1,0 +1,16 @@
+
+.table-font-size th {
+    font-size: 0.8rem;
+    white-space: nowrap;
+
+}
+.table-font-size td {
+    font-size: 0.8rem;
+}
+
+.table-wrapper-scroll-y {
+    display: block;
+    max-height: 300px;
+    /* 적절한 크기로 조절 */
+    overflow-y: auto;
+}
