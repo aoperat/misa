@@ -1,5 +1,3 @@
-import { Axios } from 'axios';
-//import { response } from 'express';
 import React, { useState } from 'react';
 import {useDispatch} from 'react-redux';
 import {registerUser} from '../../../_actions/user_action'

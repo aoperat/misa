@@ -6,7 +6,8 @@ export const AUTH_USER = 'auth_user';
 //acount
 export const INSERT_ACCOUNT = "insert_account";
 export const RETRIEVE_ACCOUNT = "retrieve_account";
-
+export const UPDATE_ACCOUNT = 'update_account';
+export const DELETE_ACCOUNT = 'delete_account';
 
 //card
 export const INSERT_CARD = "insert_card";

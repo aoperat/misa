@@ -5,14 +5,34 @@ import moment from 'moment';
 
 import { Table, Row, Col } from 'react-bootstrap';
 import { Form, Button } from 'react-bootstrap';
-import { retrieveAccountList, insertAccount } from '../../../_actions/account_action';
+import { retrieveAccountList, insertAccount,updateAccount ,deleteAccount} from '../../../_actions/account_action';
 import './../../styles/style.css'
+import { FaEdit, FaTrash, FaUndo, FaSave } from 'react-icons/fa';
+import { retrieveCardList} from '../../../_actions/card_action';
+
 
 function ExpenseHistory() {
   const [accounts, setAccounts] = useState([]);
   const [searchContent, setSearchContent] = useState('');
   const [searchCategory, setSearchCategory] = useState('');
   const [searchPaymentMethod, setSearchPaymentMethod] = useState('');
+
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  const [cards, setCards] = useState([]);
+
+  useEffect(() => {
+      if (user.userData) {
+          let body = { userId: user.userData._id };
+          dispatch(retrieveCardList(body)).then((response) => {
+              if (response.payload.success) {
+                  setCards(response.payload.cards);
+              } else {
+                  alert("Error");
+              }
+          });
+      }
+  }, [dispatch, user.userData, setCards]);
 
   return (
     <div>
@@ -28,6 +48,7 @@ function ExpenseHistory() {
               searchPaymentMethod={searchPaymentMethod}
               setSearchPaymentMethod={setSearchPaymentMethod}
               setAccounts={setAccounts}
+              cards = {cards}
             /></Col>
           </Row>
           <Row className='m-2'>
@@ -35,7 +56,7 @@ function ExpenseHistory() {
               <AccountTable accounts={accounts} setAccounts={setAccounts} />
             </Col>
             <Col md={4} >
-              <AccountForm setAccounts={setAccounts} />
+              <AccountForm setAccounts={setAccounts} cards={cards}/>
             </Col>
 
           </Row>
@@ -48,9 +69,8 @@ function ExpenseHistory() {
 
 }
 
-function AccountForm({ setAccounts }) {
+function AccountForm({ setAccounts,cards }) {
   const user = useSelector((state) => state.user);
-  console.log("user",user)
   const dispatch = useDispatch();
 
   const [date, setDate] = useState(moment().format('YYYY-MM-DD'));
@@ -158,7 +178,7 @@ function AccountForm({ setAccounts }) {
     const yesterday = moment().subtract(1, 'day').format('YYYY-MM-DD');
     setDate(yesterday);
   };
-  
+
   const handleToday = () => {
     const today = moment().format('YYYY-MM-DD');
     setDate(today);
@@ -175,9 +195,9 @@ function AccountForm({ setAccounts }) {
           <Row>
             <Col md={12} >
               <div className='d-flex'>
-              <Form.Control type="date" value={moment(date).format('YYYY-MM-DD')} onChange={handleDateChange} />
-              <Button variant="outline-secondary" className='text-nowrap' onClick={handleYesterday}>어제</Button>
-              <Button variant="outline-secondary" className='text-nowrap' onClick={handleToday}>오늘</Button>
+                <Form.Control type="date" value={moment(date).format('YYYY-MM-DD')} onChange={handleDateChange} />
+                <Button variant="outline-secondary" className='text-nowrap' onClick={handleYesterday}>어제</Button>
+                <Button variant="outline-secondary" className='text-nowrap' onClick={handleToday}>오늘</Button>
               </div>
             </Col>
           </Row>
@@ -189,7 +209,7 @@ function AccountForm({ setAccounts }) {
         </Form.Group>
         <Form.Group controlId="formBasicAmount">
           <Form.Label>금액</Form.Label>
-          <Form.Control type="number" placeholder="금액" name="amount" value={amount}  onChange={handleInputChange} />
+          <Form.Control type="number" placeholder="금액" name="amount" value={amount} onChange={handleInputChange} />
         </Form.Group>
         <Form.Group controlId="formBasicCategory">
           <Form.Label>카테고리</Form.Label>
@@ -201,14 +221,16 @@ function AccountForm({ setAccounts }) {
             <option value="기타">기타</option>
           </Form.Control>
         </Form.Group>
-        <Form.Group controlId="formBasicPaymentMethod">
+        {/* <Form.Group controlId="formBasicPaymentMethod">
           <Form.Label>결재구분</Form.Label>
           <Form.Control as="select" name="paymentMethod" value={paymentMethod} onChange={handleInputChange}>
             <option value="">사용구분</option>
             <option value="현금">현금</option>
             <option value="신용카드">신용카드</option>
           </Form.Control>
-        </Form.Group>
+        </Form.Group> */}
+
+        <PaymentMethodForm searchPaymentMethod={paymentMethod} handleInputChange={handleInputChange} cards = {cards} />
         <div className='d-flex justify-content-end mt-2'>
           <Button variant="primary" type="submit">
             입력
@@ -240,6 +262,70 @@ function AccountTable(props) {
   }, [dispatch, user.userData, setAccounts]);
 
 
+  const handleAccountsEdit = (index) => {
+    setAccounts((prevState) =>
+      prevState.map((accounts, idx) =>
+        idx === index ? { ...accounts, isEditing: true } : accounts
+      )
+    );
+  };
+
+  // Input 값 변경 시 호출되는 함수
+  const handleAccountsInputChange = (event, index, field) => {
+    const { value } = event.target;
+
+    setAccounts((prevState) =>
+      prevState.map((account, idx) =>
+        idx === index ? { ...account, [field]: value } : account
+      )
+    );
+  };
+
+  // 수정 버튼 클릭 시 호출되는 함수
+const handleAccountsUpdate = (index) => {
+  const updatedAccount = accounts[index];
+  
+  // 서버로 수정된 내역을 전송하여 데이터베이스에서 업데이트
+  dispatch(updateAccount(updatedAccount)).then((response) => {
+    if (response.payload.success) {
+      setAccounts((prevState) =>
+        prevState.map((account, idx) =>
+          idx === index ? { ...account, isEditing: false } : account
+        )
+      );
+    } else {
+      alert("Error");
+    }
+  });
+};
+
+
+  // 삭제 버튼 클릭 시 호출되는 함수
+  const handleAccountsDelete = (accountToDelete) => {
+    if (window.confirm('정말 삭제하시겠습니까?')) {
+      dispatch(deleteAccount({ accountId: accountToDelete._id }))
+        .then((response) => {
+          if (response.payload.success) {
+            setAccounts((prevState) =>
+              prevState.filter((account) => account._id !== accountToDelete._id)
+            );
+          } else {
+            alert('Error');
+          }
+        });
+    }
+  };
+  
+
+  // 취소 버튼 클릭 시 호출되는 함수
+  const handleAccountsCancel = (index) => {
+    setAccounts((prevState) =>
+      prevState.map((account, idx) =>
+        idx === index ? { ...account, isEditing: false } : account
+      )
+    );
+  };
+
   return (
     <div className="card p-3" style={{ backgroundColor: "#f8f9fa" }}>
       <h2>지출내역</h2>
@@ -256,13 +342,76 @@ function AccountTable(props) {
             </tr>
           </thead>
           <tbody>
-            {accounts.map(account => (
+            {accounts.map((account, index) => (
               <tr key={account._id}>
                 <td>{account.date}</td>
-                <td>{account.description}</td>
-                <td>{account.amount}</td>
+                <td>
+                  {account.isEditing ? (
+                    <Form.Control
+                      type="text"
+                      defaultValue={account.description}
+                      onChange={(event) =>
+                        handleAccountsInputChange(event, index, "description")
+                      }
+                    />
+                  ) : (
+                    <span>{account.description}</span>
+                  )}
+                </td>
+                <td>
+                  {account.isEditing ? (
+                    <Form.Control
+                      type="text"
+                      defaultValue={account.amount}
+                      onChange={(event) =>
+                        handleAccountsInputChange(event, index, "amount")
+                      }
+                    />
+                  ) : (
+                    <span>{account.amount}</span>
+                  )}
+                </td>
                 <td>{account.category}</td>
                 <td>{account.paymentMethod}</td>
+                <td>
+                  <div className="d-flex">
+                    {account.isEditing ? (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => handleAccountsUpdate(index)}
+                      >
+                        <FaSave />
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleAccountsEdit(index)}
+                        >
+                          <FaEdit />
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleAccountsDelete(account)}
+                        >
+                          <FaTrash />
+                        </Button>
+                      </>
+                    )}
+                    {account.isEditing && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleAccountsCancel(index)}
+                      >
+                        <FaUndo />
+                      </Button>
+                    )}
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -280,6 +429,7 @@ function SearchCard({
   searchPaymentMethod,
   setSearchPaymentMethod,
   setAccounts,
+  cards,
 }) {
 
   const user = useSelector((state) => state.user);
@@ -294,7 +444,7 @@ function SearchCard({
       case 'searchCategory':
         setSearchCategory(event.target.value);
         break;
-      case 'searchPaymentMethod':
+      case 'paymentMethod':
         setSearchPaymentMethod(event.target.value);
         break;
       default:
@@ -345,14 +495,7 @@ function SearchCard({
             </Form.Group>
           </Col>
           <Col md={3}>
-            <Form.Group controlId="formBasicSearchPaymentMethod">
-              <Form.Label>결재구분</Form.Label>
-              <Form.Control as="select" name="searchPaymentMethod" value={searchPaymentMethod} onChange={handleInputChange}>
-                <option value="">사용구분</option>
-                <option value="현금">현금</option>
-                <option value="신용카드">신용카드</option>
-              </Form.Control>
-            </Form.Group>
+            <PaymentMethodForm searchPaymentMethod={searchPaymentMethod} handleInputChange={handleInputChange} cards = {cards} />
           </Col>
           <Col md={3} className="d-flex align-items-end">
             <Button variant="primary" type="submit">
@@ -366,6 +509,24 @@ function SearchCard({
   );
 }
 
+function PaymentMethodForm({searchPaymentMethod, handleInputChange,cards}) {
+  
+
+  return (
+    <Form.Group controlId="formBasicSearchPaymentMethod">
+      <Form.Label>결재구분</Form.Label>
+      <Form.Control as="select" name="paymentMethod" value={searchPaymentMethod} onChange={handleInputChange}>
+        <option value="">사용구분</option>
+        <option value="현금">현금</option>
+        {cards.map((card, idx) =>
+          (
+          <option key={idx} value={card.name}>{card.name}</option>
+          )
+        )}
+      </Form.Control>
+    </Form.Group>
+  );
+}
 
 
 export default ExpenseHistory

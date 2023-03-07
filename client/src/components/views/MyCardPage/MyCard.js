@@ -154,7 +154,6 @@ function CardTable(props) {
             });
         }
     };
-      
 
     return (
         <div className="card p-3" style={{ backgroundColor: "#f8f9fa" }}>
@@ -168,7 +167,7 @@ function CardTable(props) {
                             <th>시작일</th>
                             <th>종료일</th>
                             <th>카드결재일</th>
-                            <th>edit</th>
+                            <th>관리</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -250,7 +249,7 @@ function CardInsertForm({ setCards }) {
         { name: '체크카드', value: 'debit' },
     ];
 
-    const [radioValue, setRadioValue] = useState('1');
+    const radioValue = '1';
 
     const onSubmitHandler = (event) => {
         event.preventDefault();

@@ -1,18 +1,23 @@
 import {
     INSERT_ACCOUNT,
-    RETRIEVE_ACCOUNT
-} from '../_actions/types'
+    RETRIEVE_ACCOUNT,
+    UPDATE_ACCOUNT,
+    DELETE_ACCOUNT
+} from '../_actions/types';
 
-export default function(state={}, action){
-
-    
+const accountReducer = (state = {}, action) => {
     switch (action.type) {
         case INSERT_ACCOUNT:
-            return {...state, loginSuccess: action.payload};
+            return { ...state, insertSuccess: action.payload };
         case RETRIEVE_ACCOUNT:
-            return {...state, loginSuccess: action.payload};
+            return { ...state, retrieveSuccess: action.payload };
+        case UPDATE_ACCOUNT:
+            return { ...state, updateSuccess: action.payload };
+        case DELETE_ACCOUNT:
+            return { ...state, deleteSuccess: action.payload };
         default:
             return state;
-            
     }
-}
+};
+
+export default accountReducer;

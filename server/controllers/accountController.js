@@ -65,4 +65,46 @@ router.post('/retrieve', (req, res) => {
     });
 });
 
+// POST /api/account/update/:id
+router.put('/update', (req, res) => {
+    const id = req.body;
+    Account.findByIdAndUpdate(id, req.body, { new: true }, (err, account) => {
+        if (err) {
+            return res.status(500).send({ success: false, message: 'Database error' });
+        }
+
+        return res.status(200).send({ success: true, account });
+    });
+});
+
+// // Update card
+// router.put('/update', (req, res) => {
+//     const updatedCard = req.body;
+//     Card.findByIdAndUpdate(updatedCard._id, updatedCard, { new: true }, (err, updatedCard) => {
+//       if (err) {
+//         console.error(err);
+//         return res.status(500).send({ success: false, message: 'Database error' });
+//       }
+  
+//       return res.status(200).send({ success: true, updatedCard });
+//     });
+//   });
+
+  
+
+// POST /api/account/delete/:id
+router.delete('/delete/:id', (req, res) => {
+    const { id } = req.params;
+
+    console.log("delete",id)
+    Account.findByIdAndDelete(id, (err, account) => {
+        if (err) {
+            return res.status(500).send({ success: false, message: 'Database error' });
+        }
+
+        return res.status(200).send({ success: true, account });
+    });
+});
+
+
 export default router;
