@@ -37,16 +37,16 @@ router.post('/retrieve', (req, res) => {
         query.paymentMethod = searchPaymentMethod;
     }
 
-    // 쿼리를 통해 지출내역을 가져옴
+    // Retrieve records from the database
     Account.find(query, (err, accounts) => {
         if (err) {
             return res.status(500).send({ success: false, message: 'Database error' });
         }
 
-        // 월별 지출내역을 저장할 객체를 생성
+        // Create an object to store monthly expenses and incomes
         const monthlyTotal = {};
 
-        // 각각의 지출내역을 순회하면서 월별 합계를 계산
+        // Iterate through each record and calculate the monthly expenses and incomes
         accounts.forEach((account) => {
             const date = new Date(account.date);
             const year = date.getFullYear();
@@ -54,16 +54,23 @@ router.post('/retrieve', (req, res) => {
             const key = `${year}-${month.toString().padStart(2, '0')}`;
 
             if (!monthlyTotal[key]) {
-                monthlyTotal[key] = 0;
+                monthlyTotal[key] = { expenses: 0, incomes: 0 };
             }
 
-            monthlyTotal[key] += parseInt(account.amount);
+            const amount = parseInt(account.amount);
+
+            if (amount > 0) {
+                monthlyTotal[key].incomes += Math.abs(amount);
+            } else {
+                monthlyTotal[key].expenses += amount;
+            }
         });
 
-        // 결과를 반환
+        // Return the result
         return res.status(200).send({ success: true, accounts, monthlyTotal });
     });
 });
+
 
 // POST /api/account/update/:id
 router.put('/update', (req, res) => {

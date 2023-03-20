@@ -61,17 +61,9 @@ function ExpenseHistory() {
         </Col>
         <Col md={2}></Col>
       </Row>
-
     </div>
   );
 
 }
-
-
-
-
-
-
-
 
 export default ExpenseHistory

@@ -11,28 +11,22 @@ function Total() {
     const [expensesByMonth, setExpensesByMonth] = useState({});
 
     useEffect(() => {
-        if (user.userData) { // user.userData가 존재하는 경우에만 실행
+        if (user.userData) {
             let body = { userId: user.userData._id };
             dispatch(retrieveAccountList(body)).then(response => {
                 if (response.payload.success) {
-                    // 월별 지출내역 합계 계산
                     const monthlyTotal = response.payload.monthlyTotal;
-
-                    const months = Object.keys(monthlyTotal).sort(); // 월별 합계가 존재하는 월 목록
-                    const expensesByMonth = {};
+                    const months = Object.keys(monthlyTotal).sort();
+                    const resultsByMonth = {};
 
                     for (let i = 1; i <= 12; i++) {
-                        let total = 0;
                         const month = `2023-${i.toString().padStart(2, '0')}`;
-
-                        console.log(months)
-                        console.log(month)
-                        if (months.includes(month)) {
-                            total += monthlyTotal[month];
-                        }
-                        expensesByMonth[month] = total;
+                        resultsByMonth[month] = {
+                            expenses: months.includes(month) ? monthlyTotal[month].expenses : 0,
+                            incomes: months.includes(month) ? monthlyTotal[month].incomes : 0,
+                        };
                     }
-                    setExpensesByMonth(expensesByMonth);
+                    setExpensesByMonth(resultsByMonth);
                 } else {
                     alert('Error');
                 }
@@ -40,73 +34,56 @@ function Total() {
         }
     }, [dispatch, user.userData]);
 
+
     return (
         <div>
             <Row>
                 <Col md={2}></Col>
                 <Col md={8}>
-                <Row className="m-2">
-                <div className="card p-3 table-wrapper-scroll-y" style={{ backgroundColor: "#f8f9fa" }}>
-                    <h2>연 평가</h2>
-                    <Table striped bordered hover className='table-font-size'>
+                    <Row className="m-2">
+                        <div className="card p-3 table-wrapper-scroll-y" style={{ backgroundColor: "#f8f9fa" }}>
+                            <h2>연 평가</h2>
+                            <Table striped bordered hover className='table-font-size'>
 
-                        <thead>
-                            <tr>
-                                <th colSpan="2">2023년</th>
-                                <th>1월</th>
-                                <th>2월</th>
-                                <th>3월</th>
-                                <th>4월</th>
-                                <th>5월</th>
-                                <th>6월</th>
-                                <th>7월</th>
-                                <th>8월</th>
-                                <th>9월</th>
-                                <th>10월</th>
-                                <th>11월</th>
-                                <th>12월</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colSpan="2">수익</td>
-                                <td>₩10,800,000</td>
-                                <td>₩10,800,000</td>
-                                <td>₩10,800,000</td>
-                                <td>₩10,800,000</td>
-                                <td>₩10,800,000</td>
-                                <td>₩10,800,000</td>
-                                <td>₩10,800,000</td>
-                                <td>₩10,800,000</td>
-                                <td>₩10,800,000</td>
-                                <td>₩10,800,000</td>
-                                <td>₩10,800,000</td>
-                                <td>₩10,800,000</td>
-                            </tr>
-                            <tr>
-                                <td colSpan="2">지출</td>
-                                <td>₩{expensesByMonth['2023-01']?.toLocaleString() ?? '₩0'}</td>
-                                <td>₩{expensesByMonth['2023-02']?.toLocaleString() ?? '₩0'}</td>
-                                <td>₩{expensesByMonth['2023-03']?.toLocaleString() ?? '₩0'}</td>
-                                <td>₩{expensesByMonth['2023-04']?.toLocaleString() ?? '₩0'}</td>
-                                <td>₩{expensesByMonth['2023-05']?.toLocaleString() ?? '₩0'}</td>
-                                <td>₩{expensesByMonth['2023-06']?.toLocaleString() ?? '₩0'}</td>
-                                <td>₩{expensesByMonth['2023-07']?.toLocaleString() ?? '₩0'}</td>
-                                <td>₩{expensesByMonth['2023-08']?.toLocaleString() ?? '₩0'}</td>
-                                <td>₩{expensesByMonth['2023-09']?.toLocaleString() ?? '₩0'}</td>
-                                <td>₩{expensesByMonth['2023-10']?.toLocaleString() ?? '₩0'}</td>
-                                <td>₩{expensesByMonth['2023-11']?.toLocaleString() ?? '₩0'}</td>
-                                <td>₩{expensesByMonth['2023-12']?.toLocaleString() ?? '₩0'}</td>
-                            </tr>
+                                <thead>
+                                    <tr>
+                                        <th colSpan="2">2023년</th>
+                                        <th>1월</th>
+                                        <th>2월</th>
+                                        <th>3월</th>
+                                        <th>4월</th>
+                                        <th>5월</th>
+                                        <th>6월</th>
+                                        <th>7월</th>
+                                        <th>8월</th>
+                                        <th>9월</th>
+                                        <th>10월</th>
+                                        <th>11월</th>
+                                        <th>12월</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colSpan="2">Revenue</td>
+                                        {Object.values(expensesByMonth).map(({ incomes }, index) => (
+                                            <td key={`income-${index}`}>{`₩${incomes.toLocaleString()}`}</td>
+                                        ))}
+                                    </tr>
+                                    <tr>
+                                        <td colSpan="2">Spend</td>
+                                        {Object.values(expensesByMonth).map(({ expenses }, index) => (
+                                            <td key={`expense-${index}`}>{`₩${expenses.toLocaleString()}`}</td>
+                                        ))}
+                                    </tr>
 
-                        </tbody>
-                    </Table>
-                </div>
-            </Row>
+                                </tbody>
+                            </Table>
+                        </div>
+                    </Row>
                 </Col>
                 <Col md={2}></Col>
             </Row>
-            
+
 
         </div>
     )
