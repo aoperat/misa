@@ -1,13 +1,14 @@
 //NavBar.js
-import React from 'react'
-import { Navbar, Container, Nav, Button } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Navbar, Container, Nav, Button, NavDropdown } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import axios from 'axios'
 function NavBar() {
 
   const user = useSelector(state => state.user.userData);
   const isAuthenticated = user && user.isAuth; // user 객체가 정의되어 있는지 확인 후에 isAuth 값에 접근합니다.
-  
+  const [expanded, setExpanded] = useState(false);
+
   const handleLogout = () => {
     axios.get('/api/users/logout')
       .then(response => {
@@ -20,31 +21,61 @@ function NavBar() {
   };
 
   return (
-    <Navbar bg="dark" variant="dark">
-      <Container>
-        <Navbar.Brand href="/">미자</Navbar.Brand>
-        <Nav className="me-auto">
-          {isAuthenticated && <Nav.Link href="/expenseHistory">지출내역</Nav.Link>}
-          {/* <Nav.Link href="/fixedExpenses">고정비</Nav.Link> */}
-          {isAuthenticated && <Nav.Link href="/total">종합</Nav.Link>}
-
-          {isAuthenticated && <Nav.Link href="/myCard">내카드</Nav.Link>}
-          {/* <Nav.Link href="#pricing">목표</Nav.Link> */}
-
-        </Nav>
-        <Nav>
-          {!isAuthenticated && <Nav.Link href="/register">회원가입</Nav.Link>}
-          {isAuthenticated && (
-            <Button variant="outline-light" onClick={handleLogout}>
-              로그아웃
-            </Button>
-          )}
-          {/* <Nav.Link eventKey={2} href="#memes">
-              Dank memes
-            </Nav.Link> */}
-        </Nav>
-      </Container>
-    </Navbar>
+    <Navbar
+            bg="dark"
+            variant="dark"
+            expand="lg"
+            expanded={expanded}
+            onToggle={() => setExpanded(!expanded)}
+        >
+            <Container>
+                <Navbar.Brand href="/">Mija</Navbar.Brand>
+                <Navbar.Toggle
+                    aria-controls="responsive-navbar-nav"
+                    onClick={() => setExpanded(!expanded)}
+                />
+                <Navbar.Collapse id="responsive-navbar-nav">
+                    <Nav className="me-auto">
+                        {isAuthenticated && (
+                            <Nav.Link
+                                href="/expenseHistory"
+                                onClick={() => setExpanded(false)}
+                            >
+                                Expense History
+                            </Nav.Link>
+                        )}
+                        {isAuthenticated && (
+                            <Nav.Link href="/total" onClick={() => setExpanded(false)}>
+                                Total
+                            </Nav.Link>
+                        )}
+                        {isAuthenticated && (
+                            <Nav.Link href="/myCard" onClick={() => setExpanded(false)}>
+                                My Card
+                            </Nav.Link>
+                        )}
+                    </Nav>
+                    <Nav>
+                        {!isAuthenticated && (
+                            <Nav.Link href="/register" onClick={() => setExpanded(false)}>
+                                Register
+                            </Nav.Link>
+                        )}
+                        {isAuthenticated && (
+                            <Button
+                                variant="outline-light"
+                                onClick={() => {
+                                    handleLogout();
+                                    setExpanded(false);
+                                }}
+                            >
+                                log out
+                            </Button>
+                        )}
+                    </Nav>
+                </Navbar.Collapse>
+            </Container>
+        </Navbar>
   )
 }
 
