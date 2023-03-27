@@ -1,8 +1,53 @@
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #f39c12;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+/* style.css */
+.card {
+  margin: 0.8rem 0;
+  padding: 0.8rem;
+}
+
+form {
+  margin-top: 0.8rem;
+}
+
+/* style.css */
+.container {
+    padding: 0 1rem;
+  }
+  
+  @media (min-width: 768px) {
+    .container {
+      padding: 0 2rem;
+    }
+  }
+
+  
+
+/* Example usage */
+.navbar {
+    background-color: var(--primary-color);
+}
+
+button {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
 table th {
     font-size: 0.8rem;
     white-space: nowrap;
 
 }
+
 table td {
     font-size: 0.8rem;
 }
@@ -14,10 +59,10 @@ table td {
     overflow-y: auto;
 }
 
-h2{
+h2 {
     font-weight: 600;
 }
 
-.card{
-    font-size : 0.8rem;
+.card {
+    font-size: 0.8rem;
 }

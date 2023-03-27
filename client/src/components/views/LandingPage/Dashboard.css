@@ -1,0 +1,42 @@
+.dashboard-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+    width: 100%;
+    height: 100vh;
+    padding: 20px;
+  }
+  
+  .card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    border-radius: 5px;
+    background-color: white;
+  }
+  
+  .profile-card,
+  .recent-transactions-card,
+  .calendar-card {
+    flex: 1;
+  }
+  
+  @media (max-width: 768px) {
+    .profile-card,
+    .recent-transactions-card,
+    .calendar-card {
+      flex: 100%;
+    }
+  
+    .dashboard-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      width: 100%;
+      height: 100vh;
+      padding: 20px;
+      align-items: initial; /* Reset align-items property for responsive case */
+    }
+  }
